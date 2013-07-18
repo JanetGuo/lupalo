@@ -1,0 +1,587 @@
+<html>
+<head>
+	<title>HTML5 Bananagrams</title>
+
+       <style type="text/css">
+        #canvas-container {
+            border: black 1px solid;
+            width: 810px;
+            height:810px;
+        }
+	</style>
+</head>
+<body onload="init()">
+	<section>
+	    <div id="canvas-container">
+		    <canvas id="canvas" width="810" height="810">
+			    Your browser does not support HTML5.
+		    </canvas>
+	    </div>
+	</section>
+	
+	<script type="text/javascript">
+		var WIDTH; 					        // Width of the canvas
+		var HEIGHT; 					    // Height of the canvas
+		var CANVAS_RIGHT = 800;
+		var CANVAS_LEFT = 9;
+		var CANVAS_TOP = 9;
+		var CANVAS_BOTTOM = 800;
+		var INTERVAL = 20; 				    // How often to redraw the canavas (ms)
+
+		var TILE_WIDTH = 28;                // SThe width of each tile
+		var TILE_HEIGHT = 28;               // The height of each tile
+		var TILE_RADIUS = 28;                // The radius of the rounded edges of the tiles
+		var TILE_TOTAL_WIDTH;               // The total width of each tile
+		var TILE_TOTAL_HEIGHT;              // The total height of each tile
+		var TILE_FILL = '#F8D9A3';          // The background color of each tile
+		var TILE_STROKE = '#000000';        // The border color of each tile
+		var TILE_SELECTED_FILL = '#FF0000'; // The background color of selected tiles
+		var TILE_TEXT_FILL = '#000000';     // The color of the text on the tile
+
+		var canvas;                         // Reference to the canvas element
+		var ctx;                            // Reference to the context used for drawing
+		var isDragging = false;             // Indicating whether or not the user is dragging a tile
+		var mouseX; 					    // Current mouse X coordinate
+		var mouseY;                         // Current mouse Y coordinate
+		var lastMouseX = 0;                 // The last seen mouse X coordinate
+		var lastMouseY = 0;                 // the last seen mouse Y coordinate
+		var changeInX;                      // The difference between the last and current mouse X coordinate
+		var changeInY;                      // The difference between the last and current mouse Y coordinate
+
+		var redrawCanvas = false;           // Indicates whether or not the canvas needs to be redrawn	
+
+		var tilesInPlay = [];               // Stores all tiles currently on the canvas
+		var tiles = [];                     // Stores the tiles not currently on the canvas 	
+		
+		var CELL_RADIUS = 30;              // Radius of cell on board for moving tiles 
+		var ncells = 100;
+		var cellInBoard = [];
+		var cells = [];
+		var offX;                           // Indicates that the mouse has moved off the canvas
+											// on the x axis
+		var offY                            // Indicates that the mouse has moved off the canvas
+											// on the y axis
+
+		var statusMessage
+		var statusMessage1
+
+
+		// Object to represent each tile in the game
+		function HexTile() {
+			this.id = -1;
+			this.x = 0;
+			this.y = 0;
+			this.rotation = 0;
+			this.value = 0;
+			this.selected = false;
+			this.placed   = false;
+		}
+
+
+		// Object to represent each tile in the game
+		function Cell() {
+			this.id = -1;
+			this.x = 0;
+			this.y = 0;
+			this.occupied = false;
+		}
+
+
+		// Object to represent each tile in the game
+		function Tile() {
+			this.x = 0;
+			this.y = 0;
+			this.letter = '';
+			this.value = 0;
+			this.selected = false;
+		}
+
+		function init(id) {
+			// Setup the global variables
+			TILE_TOTAL_WIDTH = TILE_WIDTH + TILE_RADIUS;
+			TILE_TOTAL_HEIGHT = TILE_HEIGHT + TILE_RADIUS;
+
+			canvas = document.getElementById('canvas');
+			HEIGHT = canvas.height;
+			WIDTH = canvas.width;
+			ctx = canvas.getContext('2d');
+
+			// Set the global text properties for the text drawn on the letters
+			ctx.font = '20px sans-serif';
+			ctx.textBaseline = 'top';		
+
+			// Set how often the draw method will be called
+			setInterval(draw, INTERVAL);
+
+			// Wire up the mouse event handlers
+			canvas.onmousedown = mouseDown;
+			canvas.onmouseup = mouseUp;	            
+
+			// Setup the cell arrays
+			initCells();
+
+			// Setup the tile arrays
+			//initTiles();
+			initHexTiles();
+
+			// Add 21 tiles at the bottom of the canvas
+			var y = HEIGHT - (TILE_TOTAL_HEIGHT * 2);
+			var x = 60;
+
+			for (var i = 0; i < 21; i++) {
+				//addTile(x, y);
+				addHexTile(x, y);
+				x = x + TILE_TOTAL_WIDTH;
+			}
+
+			alert(user);
+
+		}
+
+
+		function xmlhttpPost(strURL,pos) {
+    			var xmlHttpReq = false;
+    			var self = this;
+    			// Mozilla/Safari
+    			if (window.XMLHttpRequest) {
+        			self.xmlHttpReq = new XMLHttpRequest();
+    			}
+    			// IE
+    			else if (window.ActiveXObject) {
+        			self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+    			}
+    			self.xmlHttpReq.open('POST', strURL, true);
+    			// self.xmlHttpReq.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded');
+    			self.xmlHttpReq.setRequestHeader( 'Content-Type', 'application/json');	
+    			self.xmlHttpReq.onreadystatechange = function() {
+        			if (self.xmlHttpReq.readyState == 4) {
+					//updatepage( "Hello");
+            				updatepage(self.xmlHttpReq.responseText);
+					alert( [ "success:", self.xmlHttpReq.responseText ] );
+        			}
+    			}
+			//updatepage(getquerystring());
+    			self.xmlHttpReq.send(getquerystring(pos));
+		}
+
+//		//function getquerystring() {
+//		//	var form     = document.forms['f1'];
+//		//	var word = form.word.value;
+//		//	qstr = 'w=' + escape(word);  // NOTE: no '?' before querystring
+//		//	return qstr;
+//		//}
+
+		function getquerystring(pos) {
+			var jsonobj = {
+        			"cellid": pos[0],
+        			"tileid": pos[1],
+        			"rot":    pos[2]
+    				}
+
+			var jsonstr=JSON.stringify(jsonobj)
+
+    			return jsonstr;
+		}
+
+		function updatepage(str){
+			statusMessage  = str;
+			statusMessage1 = "Hello";
+		}
+
+		function displayStatus(ctx,statusMessage){
+			ctx.font="30px Arial";
+			ctx.fillText(statusMessage, 100, 200 );
+			ctx.fillText(statusMessage1,100, 180 );
+		}	
+
+		function initHexTiles() {
+
+			// Create a new tile object for each letter and value above
+			for ( var i = 0; i < 10 ; i++ ){
+				var tile = new HexTile;
+				tile.rotation = 0;
+				tile.value = 0;
+				tile.id    = i;
+
+				// Add the tile to the tiles array
+				tiles.push(tile);
+			}
+			
+		}
+
+
+		function initCells() {
+			var k = 0;
+			for ( var i = 0; i < 20; i++ ){
+				for ( var j = 0; j < 20; j++ ){
+					var cell = new Cell;
+					cell.x = 100*i;
+					cell.y = 100*j;
+					cell.id = k;
+					cell.occupied = false;
+					cellInBoard.push(cell);
+					k += 1;
+				}
+			}	
+		}	
+
+
+		function initTiles() {
+			// All the possible letter tiles in the game
+			var possibleLetters = ['J', 'J', 'K', 'K', 'Q', 'Q', 'X', 'X', 'Z', 'Z',
+								   'B', 'B', 'B', 'C', 'C', 'C', 'F', 'F', 'F', 'H', 'H', 'H', 'M', 'M', 'M', 'P', 'P', 'P', 'V', 'V', 'V', 'W', 'W', 'W', 'Y', 'Y', 'Y',
+								   'G', 'G', 'G', 'G',
+								   'L', 'L', 'L', 'L', 'L',
+								   'D', 'D', 'D', 'D', 'D', 'D', 'S', 'S', 'S', 'S', 'S', 'S', 'U', 'U', 'U', 'U', 'U',
+								   'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N',
+								   'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R',
+								   'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O',
+								   'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I',
+								   'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A',
+								   'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'
+								  ];
+
+			// The value associated with each letter above.  This will
+			// be used in a Bananagram variant where tiles are scored like
+			// Scrabble
+			var values = [8, 8, 5, 5, 10, 10, 8, 8, 10, 10,
+						  3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+						  2, 2, 2, 2,
+						  1, 1, 1, 1, 1,
+						  2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+						  1, 1, 1, 1, 1, 1, 1, 1,
+						  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+						  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+						  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+						  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+						  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+						];
+
+			// Create a new tile object for each letter and value above
+			for (var i = 0; i < possibleLetters.length; i++) {
+				var tile = new Tile;
+				tile.letter = possibleLetters[i];
+				tile.value = values[i];
+
+				// Add the tile to the tiles array
+				tiles.push(tile);
+			}
+		}
+
+		// Adds a random tile to the canvas at the given coordinates
+		function addTile(x, y) {
+			// Get a random number the be used to index into
+			// the tiles array
+			var index = Math.floor(Math.random() * tiles.length);
+
+			// Remove the random tile from the array and
+			// set its location
+			var tile = tiles.splice(index, 1)[0];
+			tile.x = x;
+			tile.y = y;
+
+			// Add the tile to the tilesInPlay array and
+			// indicate taht the canvas needs to be redrawn
+			tilesInPlay.push(tile);
+			needsRedraw();
+		}
+
+		// Adds a random tile to the canvas at the given coordinates
+		function addHexTile(x, y) {
+			// Get a random number the be used to index into
+			// the tiles array
+			var index = Math.floor(Math.random() * tiles.length);
+
+			// Remove the random tile from the array and
+			// set its location
+			var tile = tiles.splice(index, 1)[0];
+			tile.x = x;
+			tile.y = y;
+
+			// Add the tile to the tilesInPlay array and
+			// indicate taht the canvas needs to be redrawn
+			tilesInPlay.push(tile);
+			needsRedraw();
+		}
+
+
+
+
+		// Indicate that the canvas needs to be redrawn
+		function needsRedraw() {
+			redrawCanvas = true;
+		}
+
+		// Draw the various objects on the canvas
+		function draw() {
+			// Only draw the canvas if it is not valid
+			if (redrawCanvas) {
+				clear(ctx);
+
+				// draw the unselected tiles first so they appear under the selected tiles
+				for (var i = 0; i < tilesInPlay.length; i++) {
+					if (!tilesInPlay[i].selected)
+						drawHexTile(ctx, tilesInPlay[i]);
+				}
+
+				// now draw the selected tiles so they appear on top of the unselected tiles
+				for (var i = 0; i < tilesInPlay.length; i++) {
+					if (tilesInPlay[i].selected)
+						drawHexTile(ctx, tilesInPlay[i]);
+				}	
+
+				// display status			
+				displayStatus(ctx,statusMessage);
+
+				// Indicate that the canvas no longer needs to be redrawn
+				redrawCanvas = false;
+			}
+		}
+
+		// Draw a single tile using the passed in context
+		function drawTile(context, tile) {
+			// Draw the tile with rounded corners
+			context.beginPath();
+			context.moveTo(tile.x + TILE_RADIUS, tile.y);
+			context.lineTo(tile.x + TILE_WIDTH - TILE_RADIUS, tile.y);
+			context.quadraticCurveTo(tile.x + TILE_WIDTH, tile.y, tile.x + TILE_WIDTH, tile.y + TILE_RADIUS);
+			context.lineTo(tile.x + TILE_WIDTH, tile.y + TILE_HEIGHT - TILE_RADIUS);
+			context.quadraticCurveTo(tile.x + TILE_WIDTH, tile.y + TILE_HEIGHT, tile.x + TILE_WIDTH - TILE_RADIUS, tile.y + TILE_HEIGHT);
+			context.lineTo(tile.x + TILE_RADIUS, tile.y + TILE_HEIGHT);
+			context.quadraticCurveTo(tile.x, tile.y + TILE_HEIGHT, tile.x, tile.y + TILE_HEIGHT - TILE_RADIUS);
+			context.lineTo(tile.x, tile.y + TILE_RADIUS);
+			context.quadraticCurveTo(tile.x, tile.y, tile.x + TILE_RADIUS, tile.y);
+			context.closePath();
+
+			// Draw the border around the tile
+			context.strokeStyle = TILE_STROKE;
+			context.stroke();	            
+
+			// Fill the tile background depending on whether or not
+			// the tile is selected or not
+			context.fillStyle = (tile.selected ? TILE_SELECTED_FILL : TILE_FILL);
+			context.fill();	            	            
+
+			// Draw the letter on the tile
+			context.fillStyle = TILE_TEXT_FILL;                
+
+			// Get the text metrics so we can measure the width of the letter
+			// that will be drawn
+			var textMetrics = context.measureText(tile.letter);
+
+			// Draw the letter in the middle of the tile
+			context.fillText(tile.letter, tile.x + ((TILE_TOTAL_WIDTH - textMetrics.width - 2) / 2), tile.y + 2);
+		}
+
+
+		// Draw a single tile using the passed in context
+		function drawHexTile(context, tile) {
+			// Draw the tile with rounded corners
+
+			context.beginPath();
+                        context.moveTo( tile.x + TILE_RADIUS*Math.cos( (tile.rotation + 0)*Math.PI/3.0 ), tile.y + TILE_RADIUS*Math.sin( ( tile.rotation + 0 )*Math.PI/3.0 ) );
+			for ( var i = 1; i < 6; i++ ) {
+                        	context.lineTo( tile.x + TILE_RADIUS*Math.cos( (tile.rotation + i)*Math.PI/3.0 ), tile.y + TILE_RADIUS*Math.sin( ( tile.rotation + i )*Math.PI/3.0 ) );
+			}
+
+			context.closePath();
+
+			// Draw the border around the tile
+			context.strokeStyle = TILE_STROKE;
+			context.stroke();	            
+
+			// Fill the tile background depending on whether or not
+			// the tile is selected or not
+			context.fillStyle = (tile.selected ? TILE_SELECTED_FILL : TILE_FILL);
+			context.fill();	            	            
+
+		}
+
+
+		// Clears the canvas
+		function clear(c) {
+			c.clearRect(0, 0, WIDTH, HEIGHT);
+		}
+
+		function mouseDown(e) {
+			// Get the current mouse coordinates
+			getMouse(e);
+
+			// Indicate that the user is not dragging any tiles
+			isDragging = false;
+
+			// Check to see if the user as clicked a tile
+			for (var i = 0; i < tilesInPlay.length; i++) {
+				var tile = tilesInPlay[i];
+				if ( tile.placed == false ){
+					// Calculate the left, right, top and bottom
+					// bounds of the current tile
+					var lefti   = tile.x + 0.25*TILE_TOTAL_WIDTH;
+					var righti  = tile.x + 0.75*TILE_TOTAL_WIDTH;
+					var topi    = tile.y + 0.25*TILE_TOTAL_HEIGHT;
+					var bottomi = tile.y + 0.75*TILE_TOTAL_HEIGHT;
+
+					var left   = tile.x;
+					var right  = tile.x + TILE_TOTAL_WIDTH;
+					var top    = tile.y;
+					var bottom = tile.y + TILE_TOTAL_HEIGHT;
+
+					// Determine if the tile was clicked
+					if (( ( mouseX - tile.x )*( mouseX - tile.x ) + ( mouseY - tile.y )*( mouseY - tile.y ) ) < TILE_RADIUS*TILE_RADIUS ){ 
+					if (( ( mouseX - tile.x )*( mouseX - tile.x ) + ( mouseY - tile.y )*( mouseY - tile.y ) ) > 0.25*TILE_RADIUS*TILE_RADIUS ){ 
+						// Indicate that the current tile is selected
+						tilesInPlay[i].selected = true;
+						tilesInPlay[i].rotation = tilesInPlay[i].rotation + 1;
+						isDragging = true;
+						needsRedraw();
+						return;
+	
+					}else{
+						// Indicate that the current tile is selected
+						tilesInPlay[i].selected = true;
+						isDragging = true;
+
+						// Wire up the onmousemove event to handle the dragging
+						canvas.onmousemove = mouseMove;
+						needsRedraw();
+						return;
+					}}
+				}
+			}
+
+			// No tiles were clicked, make sure all tiles are not selected
+			clearSelectedTiles();
+		}
+
+		function mouseMove(e) {
+			// If the user is dragging a tile
+			if (isDragging) {
+				getMouse(e);
+
+				for (var i = 0; i < tilesInPlay.length; i++) {
+					var tile = tilesInPlay[i];
+
+					// Only if the tile is selected do we want to drag it
+					if (tile.selected) {	                   
+
+						// Only move tiles to the right or left if the mouse is between the left and
+						// right bounds of the canvas
+						if (mouseX < CANVAS_RIGHT && mouseX > CANVAS_LEFT) {
+
+							for (var k = 0; k < ncells; k++) {
+								var cell = cellInBoard[k];
+								// Determine if the cell was near
+								if ( cell.occupied == false ){
+									if (( ( mouseX - cell.x )*( mouseX - cell.x ) + ( mouseY - cell.y )*( mouseY - cell.y ) ) < CELL_RADIUS*CELL_RADIUS ){ 
+										tile.x = cell.x;
+										tile.y = cell.y;
+									}
+								}
+							}
+
+							// Move the tile if it is not off the canvas
+							// or if the mouse was off the canvas on the left or right
+							// side before but has now come back onto the canvas
+							if ((tile.x + TILE_TOTAL_WIDTH <= WIDTH && tile.x >= 0) || offX) {
+								tile.x = tile.x + changeInX;
+							}
+						}	                   
+
+						// Only move tiles up or down if the mouse is between the top and bottom
+						// bounds of the canvas
+						if (mouseY < CANVAS_BOTTOM && mouseY > CANVAS_TOP) {
+
+							// Move the tile if the it is not off the canvas and the
+							// or if the mouse was off the canvas on the top or bottom
+							// side before but has not come back onto the canvas
+							if ((tile.y >= 0 && tile.y + TILE_TOTAL_HEIGHT <= HEIGHT) || offY) {
+								tile.y = tile.y + changeInY;
+							}
+						}
+					}
+				}
+
+				// Update the variables indicating whether or not the mouse in on the canvas
+				offX = (mouseX > CANVAS_RIGHT || mouseX < CANVAS_LEFT)
+				offY = (mouseY > CANVAS_BOTTOM || mouseY < CANVAS_TOP)
+
+				needsRedraw();
+			}
+		}
+
+		function mouseUp(e) {
+
+			// Indicate that we are no longer dragging tiles and stop
+			// handling mouse movement
+			isDragging = false;
+			document.onmousemove = null;
+
+			for (var i = 0; i < tilesInPlay.length; i++) {
+				var tile = tilesInPlay[i];
+				// Only if the tile is selected do we want to drag it
+				if (tile.selected) {
+
+
+					for (var k = 0; k < ncells; k++) {
+						var cell = cellInBoard[k];
+						// Determine if the cell was near
+
+						if ( cell.occupied == false ){
+							if (( ( tile.x - cell.x )*( tile.x - cell.x ) + ( tile.y - cell.y )*( tile.y - cell.y ) ) < CELL_RADIUS*CELL_RADIUS ){ 
+								tile.x = cell.x;
+								tile.y = cell.y;
+								cell.occupied = true;
+								tile.placed = true;
+								xmlhttpPost("http://127.0.0.1:8000/polls/send/",[cell.id,tile.id,tile.rotation]); 
+	
+							}
+						}	
+					}
+
+			}	                   
+			}
+	
+
+			// Deselect all tiles
+			clearSelectedTiles();	
+			needsRedraw();
+		}
+
+		 // Sets the tile.selected property to false for
+		// all tiles in play
+		function clearSelectedTiles() {
+			for (var i = 0; i < tilesInPlay.length; i++) {
+				tilesInPlay[i].selected = false;
+			}
+		}
+
+		// Sets mouseX and mouseY variables taking into account padding and borders
+		function getMouse(e) {
+			var element = canvas;
+			var offsetX = 0;
+			var offsetY = 0;
+
+			// Calculate offsets
+			if (element.offsetParent) {
+				do {
+					offsetX += element.offsetLeft;
+					offsetY += element.offsetTop;
+				} while ((element = element.offsetParent));
+			}	
+
+			// Calculate the mouse location
+			mouseX = e.pageX - offsetX;
+			mouseY = e.pageY - offsetY;
+
+			// Calculate the change in mouse position for the last
+			// time getMouse was called
+			changeInX = mouseX - lastMouseX;
+			changeInY = mouseY - lastMouseY;
+
+			// Store the current mouseX and mouseY positions
+			lastMouseX = mouseX;
+			lastMouseY = mouseY;
+		}	
+	</script>
+</body>
+</html>

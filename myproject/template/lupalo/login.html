@@ -1,0 +1,39 @@
+<html>
+    <head>
+      <title>My Facebook Login Page</title>
+    </head>
+    <body>
+
+      <div id="fb-root"></div>
+      <script>
+        window.fbAsyncInit = function() {
+          FB.init({
+            appId      : '286233818150537', // App ID
+            channelUrl : '//www.lupalo.com/login/' // Channel File
+            status     : true, // check login status
+            cookie     : true, // enable cookies to allow the server to access the session
+            xfbml      : true  // parse XFBML
+          });
+        };
+        // Load the SDK Asynchronously
+        (function(d){
+           var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+           if (d.getElementById(id)) {return;}
+           js = d.createElement('script'); js.id = id; js.async = true;
+           js.src = "//connect.facebook.net/en_US/all.js";
+           ref.parentNode.insertBefore(js, ref);
+         }(document));
+      </script>
+
+
+	<div 
+        class="fb-registration" 
+        data-fields="[{'name':'name'}, {'name':'email'},
+          {'name':'favorite_car','description':'What is your favorite car?',
+            'type':'text'}]" 
+        data-redirect-uri='//www.lupalo.com/loggedin/'
+      </div>
+
+
+    </body>
+ </html>

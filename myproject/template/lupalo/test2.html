@@ -1,0 +1,64 @@
+<?php
+   require_once('php-sdk/facebook.php');
+   $config = array(
+     'appId'  =>  '286233818150537',
+     'secret' =>  '8dcd6555f814b4d827dac652874bb7a5'
+   );
+   $facebook = new Facebook($config);
+?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:fb="https://www.facebook.com/2008/fbml">
+  <head>
+	 <title>Deleting Requests Example</title>
+  </head>
+ <body>
+
+<?php
+   $user_id = $facebook->getUser();
+   if ($user_id) {
+	
+      //Get the Request Ids
+      $request_ids = explode(',', $_REQUEST['request_ids']); 
+
+      //Construct full Request_Id
+      function build_full_request_id($request_id, $user_id) {
+	      return $request_id . '_' . $user_id;
+	     }
+			
+       //For each Request construct full Request_id and Delete
+       foreach ($request_ids as $request_id) { 
+   	 echo ("reqeust_id=".$request_id."<br>");
+ 	 $full_request_id = 
+           build_full_request_id($request_id,$user_id);	
+         echo ("full_reqeust_id=".$full_request_id."<br>");
+	  
+     	 try {
+           $delete_success =
+               $facebook->api("/$full_request_id",'DELETE');
+            if ($delete_success) {
+                 echo "Successfully deleted " . $full_request_id;
+                 }
+             else {
+                 echo "Delete failed".$full_request_id; 
+                }
+             }         
+          catch (FacebookApiException $e) {
+                 echo "error";
+             }   
+          }
+    }
+    //User TOS if user has not authenticated your App
+    else if (!isset($_REQUEST['error'])){        
+     	 $params = array(
+          'redirect_uri' => 'http://localhost/~namitag/requests.php'
+         );
+        $loginUrl = $facebook->getLoginUrl($params);
+        echo 
+          '<script>window.top.location.href="'.$loginUrl.'";</script>';	
+       }
+       else {
+         echo ("user denied permission"); }
+  
+ ?>
+</body>
+</html>

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block heading %}My Facebook Login Page{% endblock %}
+
+{% block script %}
+
+    <script type="text/javascript" src="/media/js/jquery-1.3.2.min.js"></script>
+	
+    <script type="text/javascript">
+    function window.startConnect(){
+        FB.login( function(response) {
+            if (response.authResponse) {
+                window.location = window.location +
+                        '?access_token=' + response.authResponse.accessToken +
+                        '&expires=' + response.authResponse.expiresIn +
+                        '&signed_request=' + response.authResponse.signedRequest;
+            }
+        }, {scope: "{{ app_scope }}" })
+    }
+{% endblock %}
+
+
+{% block content %}
+
+    <div id="fb-root"></div>
+    <script>
+
+       	alert(  'test ' + {{fb_app_id}} );
+
+	// listen to an Event
+	$(document).bind('fbInit',function(){
+    	console.log('fbInit complete; FB Object is Available');
+	});
+
+
+        function requestCallback(response) {
+           alert( 'request callback' ); 
+        // Handle callback here
+        }
+
+
+
+	// FB Async
+	window.fbAsyncInit = function() {
+    	FB.init({appId: {{fb_app_id}}, 
+        	status: true, 
+         	cookie: true,
+         	oauth:true,
+         	xfbml: true});
+
+
+ FB.ui({method: 'apprequests',
+           message: 'My Great Request'
+          }, requestCallback);
+
+
+
+
+    	$(document).trigger('fbInit'); // trigger event
+	};
+ 
+	//window.fbAsyncInit = function() {
+        //  FB.init({
+        //    appId: {{fb_app_id}}, // App ID
+        //    channelUrl : '//www.lupalo.com/channel.html', // Channel File
+        //    status     : true, // check login status
+        //    cookie     : true, // enable cookies to allow the server to access the session
+        //    xfbml      : true  // parse XFBML
+        //  });
+        //};
+
+ 
+        // Load the SDK Asynchronously
+        (function(d){
+           var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+           if (d.getElementById(id)) {return;}
+           js = d.createElement('script'); js.id = id; js.async = true;
+           js.src = "//connect.facebook.net/en_US/all.js";
+           ref.parentNode.insertBefore(js, ref);
+         }(document));
+
+    </script>
+
+	{% if user.is_authenticated %}
+	    <p>Authenticated successfully as {{ user }}</p>
+	    <a href="{% url done %}">Done</a>
+	{% else %}
+	    <p>You are a guest in this Facebook application.</p>
+	    <a href="javascript:void(0)" onclick="startConnect();">Click to connect and authenticate</a>
+	{% endif %}
+
+
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block heading %}Facebook Request Example{% endblock %}
+ 
+{% block content %}
+
+{#
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:fb="https://www.facebook.com/2008/fbml">
+  <head>
+    <title>Request Example</title>
+  </head>
+
+  <body> #}
+
+    <div id="fb-root"></div>
+    <script src="http://connect.facebook.net/en_US/all.js"></script>
+    <p>
+      <input type="button"
+        onclick="sendRequestToRecipients(); return false;"
+        value="Send Request to Users Directly"
+      />
+      <input type="text" value="User ID" name="user_ids" />
+      </p>
+    <p>
+    <input type="button"
+      onclick="sendRequestViaMultiFriendSelector(); return false;"
+      value="Send Request to Many Users with MFS"
+    />
+    </p>
+    
+    <script>
+      FB.init({
+        appId  : '286233818150537',
+        frictionlessRequests: true
+      });
+
+      function sendRequestToRecipients() {
+        var user_ids = document.getElementsByName("user_ids")[0].value;
+        FB.ui({method: 'apprequests',
+          message: 'My Great Request',
+          to: user_ids
+        }, requestCallback);
+      }
+
+      function sendRequestViaMultiFriendSelector() {
+
+        FB.ui({method: 'apprequests',
+          message: 'My Great Request',
+          redirect_uri: 'http://www.lupalo.com/handlefbrequest/'
+        }, requestCallback);
+      }
+      
+      function requestCallback(response) {
+        // Handle callback here
+	//location.replace("{% url requestback %}")
+        //document.location.assign("http://www.lupalo.com/handlefbrequest") 
+        //self.location("http://www.lupalo.com/handlefbrequest") 
+	
+	var url = 'http://www.lupalo.com/handlefbrequest/';
+	var test = response;
+	//var form = $('<form action="' + url + '" method="get">' +
+	//var form = $('<form action="http://www.lupalo.com/handlefbrequest/" method="get">' + '<input type="text" name="to" value="' + test.to + '" />' + '<input type="text" name="to" value="' + test.request + '" />'
+	//var form = $('<form action="http://www.lupalo.com/handlefbrequest/" method="get">' + '<input type="text" name="request" value="' + test.request + '" />' + '</form>');
+	var form = $('<form action="http://www.lupalo.com/handlefbrequest/" method="get">' + '<input type="text" name="to" value="' + test.to + '" />' + '<input type="text" name="request" value="' + test.request + '" />' + '</form>');
+	$('body').append(form);
+	$(form).submit();     
+ 
+      }
+
+    </script>
+
+
+{#  </body>
+</html> #}
+
+{% endblock %}
+

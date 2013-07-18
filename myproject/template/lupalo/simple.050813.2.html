@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="/media/css/tdfriendselector.css" /><!-- Style source: tdfriendselector.scss -->
+
+<style type="text/css">
+
+	body { font-family: sans-serif; color: #333; }
+	p { clear: left; }
+	.thesedays { float: left; text-decoration: none; margin: 0 10px 10px 0; }
+	.thesedays img { padding: 0; border: 0; height: 68px; width: 68px; }
+	#results { padding: 10px; border: 1px solid #333; font-family: monospace; }
+
+	#banner {
+	text-align:center;
+	font-family: Arial;
+	font-size: 20px;
+	font-weight: bold;
+	}
+
+	#topbar {
+	position:relative;
+	left:0px;
+	top:0px;
+	}
+
+	#mainblock {
+	position:relative;
+	left:0px;
+	top:0px;
+	}
+
+	#roomcontrol {
+	float:left;
+	width:250px;
+	}
+
+	#maingame {
+	float:right;
+	width:700px;
+	}
+
+	#canvas {
+	position:absolute;
+	clear:right;
+	right:0px;
+	top:0px;
+	margin:20px;
+	width: 650px;
+	height:650px;
+	}
+
+	#menu-container {
+	//position:absolute;
+	clear:both;
+	left:0px;
+	top:0px;
+	width: 100px;
+	height:710px;
+	}
+
+	@font-face {
+ 	font-family:coverack;
+ 	src: url("media/fonts/COVED___.TTF");
+	} 
+
+	.newgamebutton {
+	   position:absolute;
+	   left:0px;
+           top:0px
+	   #clear:left;
+	   -webkit-box-shadow: 3px 4px 10px 4px rgba(0,0,0,1);
+	      -moz-box-shadow: 3px 4px 10px 4px rgba(0,0,0,1);
+		   box-shadow: 3px 4px 10px 4px rgba(0,0,0,1);
+	   -webkit-border-radius: 7px;
+	      -moz-border-radius: 7px;
+		   border-radius: 7px;
+	   padding: 35px;
+	   display: inline-block;
+	   font-family: Arial;
+	   font-size: 20px;
+	   font-weight: bold;
+	   line-height: 54px;
+	   text-indent: 35px;
+	   text-decoration: none;
+	   color: rgba(0,0,0,1);
+	}
+	.newgamebutton:hover {
+	   border: solid 1px rgba(0,0,0,1);
+	}
+	.newgamebutton:active {
+	   background-color: rgba(10,10,10,1);
+	   font-weight: bold;
+	   text-shadow: -1px 1px 0px rgba(0,0,0,1)
+	}
+
+//	 content {
+//	 position:relative;
+//	 top:px;
+//	 left:50px;
+//	 paddingLeft:20px;
+//	 paddingTop:20px;
+//	 width:400px;
+//	}
+
+	body{font-family:coverack;
+	font-size:10px;color:#ccc;background-color:#555}
+
+	a {color:#ccc;text-decoration:none;}
+	a:hover {color:#ccc;text-decoration:none}
+
+	#tabMenu {margin:20;padding:0 50 0 59px;list-style:none;}
+	#tabMenu li {float:left;height:32px;width:50px;cursor:pointer;cursor:hand}
+
+	li.offturn {
+	float: left;
+	color: #EEE;
+	background-color: #EEE;}
+	li.onturn {
+	float: left;
+	color: #EEE;
+	background-color: #EEE;}
+	li.category {background:url(/media/images/tabFolder.png) no-repeat 0 -32px;}
+	li.famous {background:url(/media/images/tabHeart.png) no-repeat 0 -32px;}
+	li.random {background:url(/media/images/tabRandom.png) no-repeat 0 -32px;}
+
+	li.mouseover {background-position:0 0;}
+	li.mouseout {background-position:0 -32px;}
+	li.selected {background-position:0 0;}
+
+	.box {width:227px;float:left}
+	.boxTop {background:url(/media/images/boxTop.png) no-repeat;height:9px;clear:both}
+	.boxBody {background-color:#282828;}
+	.boxBottom {background:url(/media/images/boxBottom.png) no-repeat;height:11px;}
+
+	.boxBody div.parent {display:none;}
+	.boxBody div.show {display:block;}
+
+	.boxBody div ul {margin:0 10px 0 25px;padding:0;width:190px;list-style-image:url(/media/images/arrow.gif)}
+	.boxBody div li {border-bottom:1px dotted #8e8e8e; padding:4px 0;cursor:hand;cursor:pointer}
+	.boxBody div ul li.last {border-bottom:none}
+	.boxBody div li span {font-size:8px;font-style:italic; color:#888;}
+
+</style>
+{% endblock styles %}
+
+{% block content %}
+
+<script type="text/javascript">
+$(document).ready(function(){	
+
+  init_init_lupalo( {{fb_id}} ); 
+  //init_lupalo( {{game_id}}, {{player_id}}, "{{user_name}}" );
+ 
+  // define content of menus
+
+
+  //Get all the LI from the #tabMenu UL
+  $('#tabMenu li').click(function(){
+    
+    //perform the actions when it's not selected
+    if (!$(this).hasClass('selected')) {    
+           
+	    //remove the selected class from all LI    
+	    $('#tabMenu li').removeClass('selected');
+	    
+	    //Reassign the LI
+	    $(this).addClass('selected');
+	    
+	    //Hide all the DIV in .boxBody
+	    $('.boxBody div.parent').slideUp('1500');
+	    
+	    //Look for the right DIV in boxBody according to the Navigation UL index, therefore, the arrangement is very important.
+	    $('.boxBody div.parent:eq(' + $('#tabMenu > li').index(this) + ')').slideDown('1500');
+	    
+	 }
+    
+  }).mouseover(function() {
+
+    //Add and remove class, Personally I dont think this is the right way to do it, anyone please suggest    
+    $(this).addClass('mouseover');
+    $(this).removeClass('mouseout');   
+    
+  }).mouseout(function() {
+    
+    //Add and remove class
+    $(this).addClass('mouseout');
+    $(this).removeClass('mouseover');    
+    
+  });
+
+	//Mouseover with animate Effect for Category menu list
+  $('.boxBody #category li').click(function(){
+
+    //Get the Anchor tag href under the LI
+    window.location = $(this).children().attr('href');
+  }).mouseover(function() {
+
+    //Change background color and animate the padding
+    $(this).css('backgroundColor','#888');
+    $(this).children().animate({paddingLeft:"20px"}, {queue:false, duration:300});
+  }).mouseout(function() {
+    
+    //Change background color and animate the padding
+    $(this).css('backgroundColor','');
+    $(this).children().animate({paddingLeft:"0"}, {queue:false, duration:300});
+  });  
+
+	
+	//Mouseover effect for Posts, Comments, Famous Posts and Random Posts menu list.
+  $('#.boxBody li').click(function(){
+    window.location = $(this).children().attr('href');
+  }).mouseover(function() {
+    $(this).css('backgroundColor','#888');
+  }).mouseout(function() {
+    $(this).css('backgroundColor','');
+  });  	
+	
+});
+
+</script>
+
+
+
+</head>
+
+<body>
+
+    <div id="fb-root"></div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+    <script src="/media/js/tdfriendselector.js"></script>
+    <script src="/media/js/friendsel.js"></script>
+
+    <div id="topbar">
+	<div id="invite" class="newgamebutton">
+	<! href="#" id="btnSelect2" Start a game >
+		<a href="http://www.lupalo.com/requestpage/">Start a game</a>
+	</div>
+
+
+        <div id="banner"> 
+             <h1>Lupalo</h1> 
+        </div> 
+
+
+        <div id="instructions"> 
+             <p>Drag and drop tiles onto board.</p>
+        </div> 
+     </div>
+
+     <!-- Markup for These Days Friend Selector -->
+     <div id="TDFriendSelector">
+		<div class="TDFriendSelector_dialog">
+			<a href="#" id="TDFriendSelector_buttonClose">x</a>
+			<div class="TDFriendSelector_form">
+				<div class="TDFriendSelector_header">
+					<p>Select your friends</p>
+				</div>
+				<div class="TDFriendSelector_content">
+					<p>Then you can invite them to join you in the app.</p>
+					<div class="TDFriendSelector_searchContainer TDFriendSelector_clearfix">
+						<div class="TDFriendSelector_selectedCountContainer"><span class="TDFriendSelector_selectedCount">0</span> / <span class="TDFriendSelector_selectedCountMax">0</span> friends selected</div>
+						<input type="text" placeholder="Search friends" id="TDFriendSelector_searchField" />
+					</div>
+					<div class="TDFriendSelector_friendsContainer"></div>
+				</div>
+				<div class="TDFriendSelector_footer TDFriendSelector_clearfix">
+					<a href="#" id="TDFriendSelector_pagePrev" class="TDFriendSelector_disabled">Previous</a>
+					<a href="#" id="TDFriendSelector_pageNext">Next</a>
+					<div class="TDFriendSelector_pageNumberContainer">
+						Page <span id="TDFriendSelector_pageNumber">1</span> / <span id="TDFriendSelector_pageNumberTotal">1</span>
+					</div>
+					<a href="#" id="TDFriendSelector_buttonOK">OK</a>
+				</div>
+			</div>
+		</div>
+       </div>
+
+
+<div id="mainblock">
+<div id="roomcontrol">
+
+<div id="menu-container" >
+
+<div class="box">
+<ul id="tabMenu">
+  <li class="onturn selected"></li>
+  <li class="offturn"></li>
+</ul>
+<div class="boxTop"></div>
+
+<div class="boxBody">
+  
+  <div id="onturn" class="show parent">
+    <ul>
+    </ul>  
+  </div>  
+  
+  <div id="offturn" class="parent">
+    <ul>
+    </ul>
+  </div>
+  
+ 
+</div>
+
+<div class="boxBottom"></div>
+
+</div>
+</div>
+
+
+<div id="maingame">
+	<div id="content">
+	<canvas id="canvas" position=absolute right=10px top=10px margin=60px width=650px height=650px>
+	//<canvas id="canvas" left=10px top=0px margin=50px width=700px height=700px>
+	     <script type="text/javascript" src="/media/js/lupalo.js"></script>
+	</canvas>
+	</div>       
+</div>
+
+
+</div>
+</div>
+{% endblock %}

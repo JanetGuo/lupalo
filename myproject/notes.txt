@@ -1,0 +1,15 @@
+14 May 2013
+
+fb.getLoginStatus in tdfriendselector not working.
+Needed to turn off secure browsing.
+
+Q: Why can't I play games on facebook?
+Every time i try to lay a game on facebook it says:
+"Secure browsing is not supported
+This application does not yet support secure browsing (HTTPS)."
+
+
+A: you need to turn off secure browsing
+Account Settings >> Security
+https://www.facebook.com/settings?tab=se…
+most of the apps dont work in secure mode

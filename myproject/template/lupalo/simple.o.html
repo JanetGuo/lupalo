@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="instructions"> 
+<p>
+Drag and drop tiles onto board.
+</p>
+</div> 
+
+<div id="chat"></div>
+<!-- You should try to include this at another place at your convenience :D -->
+<script type="text/javascript" src="/media/js/lupalo.js"></script>
+
+<section>
+	<div id="canvas-container">
+                    <canvas id="canvas" width="800" height="800">
+                            Your browser does not support HTML5.
+                    </canvas>
+	</div>        
+</section>
+
+
+
+<script type="text/javascript">
+/* chat_id is passed from the view, the init_chat function then does all the magic */
+$(document).ready(function(){
+	/* init_lupalo( {{id}} );*/
+	init_lupalo( {{game_id}}, {{player_id}}, "{{user_name}}" );
+	/* init_lupalo( {{game_id}} ); */
+	/* init("chat"); */
+})
+</script>
+
+{% endblock %}

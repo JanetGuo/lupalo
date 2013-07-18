@@ -1,0 +1,95 @@
+Error: That port is already in use.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Unhandled exception in thread started by <bound method Command.inner_run of <django.contrib.staticfiles.management.commands.runserver.Command object at 0x1950610>>
+Validating models...
+
+Traceback (most recent call last):
+  File "/home/zozolaki/webapps/django/lib/python2.7/django/core/management/commands/runserver.py", line 91, in inner_run
+    self.validate(display_num_errors=True)
+  File "/home/zozolaki/webapps/django/lib/python2.7/django/core/management/base.py", line 270, in validate
+    raise CommandError("One or more models did not validate:\n%s" % error_text)
+django.core.management.base.CommandError: One or more models did not validate:
+lupalo.member: "fb_id": CharFields require a "max_length" attribute that is a positive integer.
+
+Validating models...
+
+0 errors found
+Django version 1.4.1, using settings 'myproject.settings'
+Development server is running at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+Unhandled exception in thread started by <bound method Command.inner_run of <django.contrib.staticfiles.management.commands.runserver.Command object at 0x1ff3610>>
+Validating models...
+
+Traceback (most recent call last):
+  File "/home/zozolaki/webapps/django/lib/python2.7/django/core/management/commands/runserver.py", line 91, in inner_run
+    self.validate(display_num_errors=True)
+  File "/home/zozolaki/webapps/django/lib/python2.7/django/core/management/base.py", line 270, in validate
+    raise CommandError("One or more models did not validate:\n%s" % error_text)
+django.core.management.base.CommandError: One or more models did not validate:
+lupalo.member: "fb_id": CharFields require a "max_length" attribute that is a positive integer.
+
